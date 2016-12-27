@@ -1,0 +1,11 @@
+version: '2'
+services: 
+    dns-server: 
+        image: tumingjian/dns-server
+        restart: alawys
+        cap_add: 
+         - NET_ADMIN
+        ports: 
+         - "53:53"
+        container_name: "cluster.dns.server"
+    

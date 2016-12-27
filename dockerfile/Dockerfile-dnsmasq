@@ -1,0 +1,14 @@
+FROM andyshinn/dnsmasq
+ENV  IP_ADDRESS=0.0.0.0 \
+     NET_MASK=255.255.255.0 \
+     GATEWAY=0.0.0.0 \
+     RESOLV_FILE=/etc/resolv.dnsmasq \
+     ADDN_HOSTS=/etc/dnsmasqhosts
+RUN sed -i s@^#resolv-file=@resolv-file=$RESOLV_FILE@g /etc/dnsmasq.conf && \
+    sed -i s@^#addn-hosts=/etc/banner_add_hosts@addn-hosts=$ADDN_HOSTS@g /etc/dnsmasq.conf  && \
+    cat /etc/dnsmasq.conf | grep resolv-file && \
+    cat /etc/dnsmasq.conf | grep addn-host
+EXPOSE 53
+ENTRYPOINT ["dnsmasq","-k"]
+
+
