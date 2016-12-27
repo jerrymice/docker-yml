@@ -15,7 +15,10 @@
 # know how you have improved it!
 
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-
+NET_SEGMENT=`echo "$NET_GATEWAY" | cut -d . -f 1-3`.0
+NET_PRE=$(echo `expr $(echo $NET_GATEWAY | cut -d . -f 3) - 1`)
+NET_SEGMENT_SEC=`echo $NET_GATEWAY | cut -d . -f 1-2`.$NET_PRE.0
+NET_GATEWAY_SEC=`echo $NET_GATEWAY | cut -d . -f 1-2`.$NET_PRE.1
 exiterr() { echo "Error: $1" >&2; exit 1; }
 
 check_ip() {
@@ -81,7 +84,7 @@ version 2.0
 
 config setup
   nat_traversal=yes
-  virtual_private=%v4:10.0.0.0/8,%v4:192.168.0.0/16,%v4:172.16.0.0/12,%v4:!192.168.42.0/23
+  virtual_private=%v4:10.0.0.0/8,%v4:192.168.0.0/16,%v4:172.16.0.0/12,%v4:!$NET_SEGMENT_SEC/23
   protostack=netkey
   nhelpers=0
   interfaces=%defaultroute
@@ -115,9 +118,9 @@ conn l2tp-psk
 conn xauth-psk
   auto=add
   leftsubnet=0.0.0.0/0
-  rightaddresspool=192.168.43.10-192.168.43.250
-  modecfgdns1=8.8.8.8
-  modecfgdns2=8.8.4.4
+  rightaddresspool=$DHCP_IP_RANGE
+  modecfgdns1=$MASTER_DNS_SERVER
+  modecfgdns2=$STANDBY_DNS_SERVER
   leftxauthserver=yes
   rightxauthclient=yes
   leftmodecfgserver=yes
@@ -136,13 +139,13 @@ $PUBLIC_IP  %any  : PSK "$VPN_IPSEC_PSK"
 EOF
 
 # Create xl2tpd config
-cat > /etc/xl2tpd/xl2tpd.conf <<'EOF'
+cat > /etc/xl2tpd/xl2tpd.conf <<EOF
 [global]
 port = 1701
 
 [lns default]
-ip range = 192.168.42.10-192.168.42.250
-local ip = 192.168.42.1
+ip range = $DHCP_IP_RANGE
+local ip = $NET_GATEWAY
 require chap = yes
 refuse pap = yes
 require authentication = yes
@@ -152,11 +155,11 @@ length bit = yes
 EOF
 
 # Set xl2tpd options
-cat > /etc/ppp/options.xl2tpd <<'EOF'
+cat > /etc/ppp/options.xl2tpd <<EOF
 ipcp-accept-local
 ipcp-accept-remote
-ms-dns 8.8.8.8
-ms-dns 8.8.4.4
+ms-dns $MASTER_DNS_SERVER
+ms-dns $STANDBY_DNS_SERVER
 noccp
 auth
 crtscts
@@ -217,15 +220,15 @@ iptables -I INPUT 5 -p udp --dport 1701 -j DROP
 iptables -I FORWARD 1 -m conntrack --ctstate INVALID -j DROP
 iptables -I FORWARD 2 -i eth+ -o ppp+ -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
 iptables -I FORWARD 3 -i ppp+ -o eth+ -j ACCEPT
-iptables -I FORWARD 4 -i ppp+ -o ppp+ -s 192.168.42.0/24 -d 192.168.42.0/24 -j ACCEPT
-iptables -I FORWARD 5 -i eth+ -d 192.168.43.0/24 -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
-iptables -I FORWARD 6 -s 192.168.43.0/24 -o eth+ -j ACCEPT
+iptables -I FORWARD 4 -i ppp+ -o ppp+ -s $NET_SEGMENT_SEC/24 -d $NET_SEGMENT_SEC/24 -j ACCEPT
+iptables -I FORWARD 5 -i eth+ -d $NET_SEGMENT/24 -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+iptables -I FORWARD 6 -s $NET_SEGMENT/24 -o eth+ -j ACCEPT
 # Uncomment if you wish to disallow traffic between VPN clients themselves
-# iptables -I FORWARD 2 -i ppp+ -o ppp+ -s 192.168.42.0/24 -d 192.168.42.0/24 -j DROP
-# iptables -I FORWARD 3 -s 192.168.43.0/24 -d 192.168.43.0/24 -j DROP
+# iptables -I FORWARD 2 -i ppp+ -o ppp+ -s $NET_SEGMENT_SEC/24 -d $NET_SEGMENT_SEC/24 -j DROP
+# iptables -I FORWARD 3 -s $NET_SEGMENT/24 -d $NET_SEGMENT/24 -j DROP
 iptables -A FORWARD -j DROP
-iptables -t nat -I POSTROUTING -s 192.168.43.0/24 -o eth+ -m policy --dir out --pol none -j SNAT --to-source "$PRIVATE_IP"
-iptables -t nat -I POSTROUTING -s 192.168.42.0/24 -o eth+ -j SNAT --to-source "$PRIVATE_IP"
+iptables -t nat -I POSTROUTING -s $NET_SEGMENT/24 -o eth+ -m policy --dir out --pol none -j SNAT --to-source "$PRIVATE_IP"
+iptables -t nat -I POSTROUTING -s $NET_SEGMENT_SEC/24 -o eth+ -j SNAT --to-source "$PRIVATE_IP"
 
 # Update file attributes
 chmod 600 /etc/ipsec.secrets /etc/ppp/chap-secrets /etc/ipsec.d/passwd

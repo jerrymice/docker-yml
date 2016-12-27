@@ -1,0 +1,4 @@
+FROM hwdsl2/ipsec-vpn-server
+COPY ./buildfile/run.sh /opt/src/run.sh
+RUN chmod 775 /opt/src/run.sh
+CMD ["/opt/src/run.sh"]
