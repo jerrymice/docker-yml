@@ -1,0 +1,33 @@
+version: '2'
+services: 
+    cluster.dns.server: 
+        image: tumingjian/dnsmasq
+        restart: alawys
+        cap_add: 
+         - NET_ADMIN
+        env_file: 
+          - /opt/soft/docker/env/dns.env
+        ports: 
+          - "53:53"
+        networks: 
+          default: 
+            ipv4_address: 172.18.0.250
+        container_name: "cluster.dns.server"
+    cluster.vpn.server:  
+        image: tumingjian/ipsec-vpn-server
+        restart: alawys
+        ports: 
+          - "4500:4500/udp"
+          - "500:500/udp"
+        networks: 
+          - default
+        volumes:  
+          - /lib/modules:/lib/modules:ro
+        env_file: 
+          - /opt/soft/docker/env/vpn.env
+        privileged: true
+        container_name: "cluster.vpn.server"
+networks: 
+  default:
+    external: 
+      name: "docker-net"     
