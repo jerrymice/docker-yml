@@ -22,10 +22,33 @@ services:
         dns:
            - 172.18.0.250
         container_name: cluster.namenode.server
+    cluster.extramanager.server:
+        image: tumingjian/oracle-jdk
+        restart: always
+        command: sh -c "cp -R /mnt/hadoop-disk/* /usr/local/hadoop && /usr/sbin/sshd && /usr/local/hadoop/sbin/mr-jobhistory-daemon.sh start historyserver && /usr/local/hadoop/bin/yarn resourcemanager"
+        volumes: 
+           - /opt/soft/hadoop-2.7.3:/mnt/hadoop-disk
+        environment:
+           - HADOOP_HOME=/usr/local/hadoop
+           - HADOOP_CONF_DIR=/usr/local/hadoop/etc/hadoop
+           - HADOOP_LIBEXEC_DIR=/usr/local/hadoop/libexec
+           - HADOOP_MAPRED_HOME=/usr/local/hadoop
+        working_dir: /usr/local/hadoop
+        ports: 
+           - "18088:18088"
+           - "19888:19888"
+        links: 
+           - cluster.namenode.server
+        networks: 
+           default: 
+             ipv4_address: 172.18.0.253
+        dns:
+           - 172.18.0.250
+        container_name: cluster.extramanager.server
     cluster.datanode1.server:
         image: tumingjian/oracle-jdk
         restart: always
-        command: sh -c "cp -R /mnt/hadoop-disk/* /usr/local/hadoop && ln -sf /usr/local/hadoop/sbin/* /usr/sbin/ && /usr/sbin/sshd &&  bin/hdfs datanode"
+        command: sh -c "cp -R /mnt/hadoop-disk/* /usr/local/hadoop && ln -sf /usr/local/hadoop/sbin/* /usr/sbin/ && /usr/sbin/sshd && /usr/local/hadoop/sbin/yarn-daemon.sh start nodemanager &&  bin/hdfs datanode"
         volumes:
           - /opt/soft/hadoop-2.7.3:/mnt/hadoop-disk
         environment:
@@ -34,15 +57,17 @@ services:
         working_dir: /usr/local/hadoop
         links: 
          - cluster.namenode.server
+         - cluster.extramanager.server
         dns:
            - 172.18.0.250
         container_name: cluster.datanode1.server
         depends_on: 
            - cluster.namenode.server
+           - cluster.extramanager.server
     cluster.datanode2.server:
         image: tumingjian/oracle-jdk
         restart: always
-        command: sh -c "cp -R /mnt/hadoop-disk/* /usr/local/hadoop && ln -sf /usr/local/hadoop/sbin/* /usr/sbin/ && /usr/sbin/sshd && bin/hdfs datanode"
+        command: sh -c "cp -R /mnt/hadoop-disk/* /usr/local/hadoop && ln -sf /usr/local/hadoop/sbin/* /usr/sbin/ && /usr/sbin/sshd && /usr/local/hadoop/sbin/yarn-daemon.sh start nodemanager && bin/hdfs datanode"
         volumes:
           - /opt/soft/hadoop-2.7.3:/mnt/hadoop-disk
         environment:
@@ -51,15 +76,17 @@ services:
         working_dir: /usr/local/hadoop
         links: 
            - cluster.namenode.server
+           - cluster.extramanager.server
         dns:
            - 172.18.0.250
         container_name: cluster.datanode2.server
         depends_on: 
            - cluster.namenode.server
+           - cluster.extramanager.server
     cluster.datanode3.server:
         image: tumingjian/oracle-jdk
         restart: always
-        command: sh -c "cp -R /mnt/hadoop-disk/* /usr/local/hadoop && ln -sf /usr/local/hadoop/sbin/* /usr/sbin/ && /usr/sbin/sshd && bin/hdfs datanode"
+        command: sh -c "cp -R /mnt/hadoop-disk/* /usr/local/hadoop && ln -sf /usr/local/hadoop/sbin/* /usr/sbin/ && /usr/sbin/sshd && /usr/local/hadoop/sbin/yarn-daemon.sh start nodemanager && bin/hdfs datanode"
         volumes:
           - /opt/soft/hadoop-2.7.3:/mnt/hadoop-disk
         environment:
@@ -67,12 +94,33 @@ services:
            - HADOOP_CONF_DIR=/usr/local/hadoop/etc/hadoop
         working_dir: /usr/local/hadoop
         links: 
-          - cluster.namenode.server     
+          - cluster.namenode.server
+          - cluster.extramanager.server     
         dns:
            - 172.18.0.250
         container_name: cluster.datanode3.server
         depends_on: 
            - cluster.namenode.server
+           - cluster.extramanager.server
+    cluster.datanode4.server:
+        image: tumingjian/oracle-jdk
+        restart: always
+        command: sh -c "cp -R /mnt/hadoop-disk/* /usr/local/hadoop && ln -sf /usr/local/hadoop/sbin/* /usr/sbin/ && /usr/sbin/sshd && /usr/local/hadoop/sbin/yarn-daemon.sh start nodemanager && bin/hdfs datanode"
+        volumes:
+          - /opt/soft/hadoop-2.7.3:/mnt/hadoop-disk
+        environment:
+           - HADOOP_HOME=/usr/local/hadoop
+           - HADOOP_CONF_DIR=/usr/local/hadoop/etc/hadoop
+        working_dir: /usr/local/hadoop
+        links:
+          - cluster.namenode.server
+          - cluster.extramanager.server
+        dns:
+           - 172.18.0.250
+        container_name: cluster.datanode4.server
+        depends_on:
+           - cluster.namenode.server
+           - cluster.extramanager.server
 networks: 
    default:
     external:
