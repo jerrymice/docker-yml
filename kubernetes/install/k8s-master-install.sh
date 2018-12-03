@@ -1,5 +1,8 @@
 #!/bin/bash
 
+#本机IP地址
+MASTER_HOST_IP=192.168.4.40
+
 STEP=0
 if [ -f 'master-install-cache' ];then
   STEP=`cat master-install-cache | awk -F ':' '{print $2}'`
@@ -78,7 +81,6 @@ EOF
 ;;
 4 )
 	#在master上初始化集群
-	MASTER_HOST_IP=192.168.4.40
 	kubeadm init —apiserver-advertise-address=$MASTER_HOST_IP —pod-network-cidr=172.18.0.0/16
 	echo "step:5">master-install-cache
 ;;
