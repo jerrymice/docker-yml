@@ -85,7 +85,7 @@ EOF
 5 )
 	#复制admin.conf文件.让kubectl命令可用.
 	mkdir -p ~/.kube
-	cp -i /etc/kubernetes/admin.conf ~/.kube/config
+	cp -Rf /etc/kubernetes/admin.conf ~/.kube/config
 	chown $(id -u):$(id -g) ~/.kube/config
 
 	#执行测试
@@ -94,6 +94,7 @@ EOF
 	echo "kubernetes master node install success"
 ;;
 esac
+STEP=$[STEP+1]
 done
 echo "kubernetes master node already installed"
 	#添加其他节点命令(请在相应的节点机器上运行)
