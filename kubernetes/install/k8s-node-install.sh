@@ -14,12 +14,19 @@ case $STEP in
 0 )
 	#安装docker-ce
 	echo "step:0">node-install-cache
-	yum -y remove docker-ce*
-	yum -y install docker-ce-17.09.0.ce-1.el7.centos.x86_64
+	yum install -y yum-utils device-mapper-persistent-data lvm2
+	yum-config-manager --add-repo https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+	yum makecache fast
 	echo "step:1">node-install-cache
 ;;
 1 )
+        yum -y remove docker-ce*
+        yum -y install docker-ce-17.09.0.ce-1.el7.centos.x86_64
 	#添加aliyuncs.com镜像仓库和docker-cn镜像仓库
+if [ ! -f '/etc/docker/daemon.json' ];then
+	mkdir -p /etc/docker
+	touch /etc/docker/daemon.json
+fi
 cat <<EOF > /etc/docker/daemon.json
 {
    "registry-mirrors": ["https://s4z40bwn.mirror.aliyuncs.com","https://registry.docker-cn.com"]
@@ -53,6 +60,7 @@ EOF
 	#开放端口ectd:2379-2380;api server:6443;kubelet api:10250;kube-scheduler:10251;kube-controller-manager:10252
 	firewall-cmd --zone=public --add-port=10250-10252/tcp --permanent
 	systemctl reload firewalld
+	systemctl restart firewalld
 	echo "step:3">node-install-cache
 ;;
 3 )
