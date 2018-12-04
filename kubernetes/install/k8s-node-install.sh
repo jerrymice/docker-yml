@@ -56,7 +56,7 @@ EOF
 	echo "step:3">node-install-cache
 ;;
 3 )
-        kubeadm join 192.168.4.208:6443 --token $TOKEN --discovery-token-ca-cert-hash $DISCOVERY_TOKEN_CA_CERT_HASH
+       # kubeadm join 192.168.4.208:6443 --token $TOKEN --discovery-token-ca-cert-hash $DISCOVERY_TOKEN_CA_CERT_HASH
 	echo "add node success"
         echo "step:4">node-install-cache
 ;;
