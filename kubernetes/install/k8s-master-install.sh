@@ -32,27 +32,8 @@ sh k8s-node-install.sh
 	echo "step:6">node-install-cache
 ;;
 6 )
-        #镜像站用户名
-        MIRROR_IMAGE_TAG=mirrorgooglecontainers
-        SOURCE_IMAGE_TAG=k8s.gcr.io
-        #获取需要拉取的镜像文件列表
-        images=`kubeadm config images list | awk -F '/' '{print $2}'`
-        coredns="coredns"
-                for image in $images;
-        do
-        if [[ $image == $coredns* ]];then
-                echo "正在拉取$SOURCE_IMAGE_TAG/$image......镜像";
-                docker pull $coredns/$image
-                docker tag $coredns/$image $SOURCE_IMAGE_TAG/$image
-                docker rmi $coredns/$image
-        else
-                echo "正在拉取$SOURCE_IMAGE_TAG/$image"
-                docker pull $MIRROR_IMAGE_TAG/$image
-                docker tag $MIRROR_IMAGE_TAG/$image $SOURCE_IMAGE_TAG/$image
-                docker rmi $MIRROR_IMAGE_TAG/$image
-        fi
-        done
-        echo "step:7">node-install-cache;
+    ./download-image.sh    
+    echo "step:7">node-install-cache;
 ;;
 7 )
         #在master上初始化集群
