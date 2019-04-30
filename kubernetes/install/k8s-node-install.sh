@@ -20,8 +20,8 @@ case $STEP in
 	echo "step:1">node-install-cache
 ;;
 1 )
-        yum -y remove docker-ce*
-        yum -y install docker-ce-17.09.0.ce-1.el7.centos.x86_64
+#        yum -y remove docker-ce*
+#        yum -y install docker-ce-17.09.0.ce-1.el7.centos.x86_64
 	#添加aliyuncs.com镜像仓库和docker-cn镜像仓库
 if [ ! -f '/etc/docker/daemon.json' ];then
 	mkdir -p /etc/docker
