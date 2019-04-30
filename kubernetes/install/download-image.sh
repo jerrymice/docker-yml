@@ -10,5 +10,5 @@ for source_image in $K8S_IMAGES; do
     echo "正在拉取$mirror_image"
     docker pull $mirror_image
     docker tag  $mirror_image $google/$image_part
-    docker rmi  $mirror_imag
 done
+docker rmi `docker images | grep $mirror_image | awk -F ' ' '{print $1,$2}' OFS=':'`
