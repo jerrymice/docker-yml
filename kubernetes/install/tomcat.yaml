@@ -21,10 +21,9 @@ metadata:
 spec:
   type: NodePort
   ports:
-    - nodePort: 31500  
-      port: 8080
+    - port: 8080
       targetPort: 8080
       protocol: TCP
   selector:
-    app: tomcat
+    name: tomcat
 
