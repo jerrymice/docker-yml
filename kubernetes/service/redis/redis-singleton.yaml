@@ -13,13 +13,8 @@ spec:
     spec:
       volumes:
         - name: redis-data
-          hostPath:
-            path: /opt/kube/pod/disk/redis/data
-            type: DirectoryOrCreate
-        - name: redis-log
-          hostPath:
-            path: /opt/kube/pod/disk/redis/redis.log
-            type: FileOrCreate
+          persistentVolumeClaim:
+            claimName: kube-disk-claim
       containers:
       - name: redis
         image: redis
@@ -35,10 +30,8 @@ spec:
         ports:
           - containerPort: 6379
         volumeMounts:
-          - mountPath: /mnt/data/redis/data
+          - mountPath: /mnt/data/
             name: redis-data
-          - mountPath: /mnt/data/redis/redis.log
-            name: redis-log
 
 apiVersion: v1
 kind: Service

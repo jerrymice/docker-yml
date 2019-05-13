@@ -13,6 +13,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   hostPath:
     path: /opt/kube/pod/disk
+    type: DirectoryOrCreate
 
 ---
 
