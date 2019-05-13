@@ -16,6 +16,7 @@ case $STEP in
 	echo "step:0">node-install-cache
 	yum install -y yum-utils device-mapper-persistent-data lvm2
 	yum-config-manager --add-repo https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+    yum-config-manager --add-repo http://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64
 	yum makecache fast
 	echo "step:1">node-install-cache
 ;;
@@ -33,17 +34,6 @@ cat <<EOF > /etc/docker/daemon.json
 }
 EOF
 	systemctl start docker
-	#添加kubernetes aliyu yum 仓库
-cat <<EOF > /etc/yum.repos.d/kubernetes.repo
-[kubernetes]
-name=Kubernetes
-baseurl=http://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64
-enabled=1
-gpgcheck=0
-repo_gpgcheck=0
-gpgkey=http://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg
-http://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg
-EOF
 	#安装
 	yum -y remove kubelet kubeadm kubectl
 	yum -y install kubelet kubeadm kubectl
