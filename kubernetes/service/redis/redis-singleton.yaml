@@ -12,7 +12,7 @@ spec:
         app: redis
     spec:
       volumes:
-        - name: redis-data
+        - name: redis-disk
           persistentVolumeClaim:
             claimName: kube-disk-claim
       containers:
@@ -30,8 +30,14 @@ spec:
         ports:
           - containerPort: 6379
         volumeMounts:
-          - mountPath: /mnt/data/
-            name: redis-data
+          - mountPath: /mnt/data/redis/data
+            name: redis-disk
+            subPath: redis/data
+          - mountPath: /mnt/data/redis/redis.log
+            name: redis-disk
+            subPath: redis/redis.log
+
+---
 
 apiVersion: v1
 kind: Service

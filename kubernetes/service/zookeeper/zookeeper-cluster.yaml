@@ -1,0 +1,207 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: zookeeper-node1
+  labels: 
+    app: zookeeper-node1
+spec:
+  volumes:
+  - name: zookeeper-disk
+    persistentVolumeClaim:
+      claimName: kube-disk-claim  
+  containers: 
+  - name: zookeeper-node1
+    resources:
+      requests:
+        memory: 100Mi
+      limits: 
+        memory: 256Mi
+    env:
+    - name: ZOO_MY_ID
+      value: "1"
+    - name: ZOO_SERVERS
+      value: server.1=0.0.0.0:2888:3888 server.2=zookeeper-node2.default.svc.app:2888:3888 server.3=zookeeper-node3.default.svc.app:2888:3888    
+    - name: ZOO_LOG4J_PROP
+      value: INFO,ROLLINGFILE
+    image: zookeeper
+    imagePullPolicy: Always
+    ports:
+    - containerPort: 2181
+      name: client
+    - containerPort: 2888
+      name: node-contact
+    - containerPort: 3888
+      name: node-election
+    volumeMounts:
+    - mountPath: /data
+      name: zookeeper-disk
+      subPath: zookeeper/node1/data
+    - mountPath: /datalog
+      name: zookeeper-disk
+      subPath: zookeeper/node1/datalog
+    - mountPath: /logs
+      name: zookeeper-disk
+      subPath: zookeeper/node1/logs
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: zookeeper-node1
+spec:
+  selector:
+    app: zookeeper-node1
+  externalIPs:
+  - 10.254.0.11
+  ports:
+  - name: client
+    port: 2181
+  - name: node-contact
+    port: 2888
+  - name: node-election
+    port: 3888
+
+
+---
+
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: zookeeper-node2
+  labels: 
+    app: zookeeper-node2
+spec:
+  volumes:
+  - name: zookeeper-disk
+    persistentVolumeClaim:
+      claimName: kube-disk-claim  
+  containers: 
+  - name: zookeeper-node2    
+    resources:
+      requests:
+        memory: 100Mi
+      limits: 
+        memory: 256Mi
+    env:
+    - name: ZOO_MY_ID
+      value: "2"
+    - name: ZOO_SERVERS
+      value: server.1=zookeeper-node1.default.svc.app:2888:3888 server.2=0.0.0.0:2888:3888 server.3=zookeeper-node3.default.svc.app:2888:3888    
+    - name: ZOO_LOG4J_PROP
+      value: INFO,ROLLINGFILE
+    image: zookeeper
+    imagePullPolicy: Always
+    ports:
+    - containerPort: 2181
+      name: client
+    - containerPort: 2888
+      name: node-contact
+    - containerPort: 3888
+      name: node-election
+    volumeMounts:
+    - mountPath: /data
+      name: zookeeper-disk
+      subPath: zookeeper/node2/data
+    - mountPath: /datalog
+      name: zookeeper-disk
+      subPath: zookeeper/node2/datalog
+    - mountPath: /logs
+      name: zookeeper-disk
+      subPath: zookeeper/node2/logs
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: zookeeper-node2
+spec:
+  selector:
+    app: zookeeper-node2
+  externalIPs:
+  - 10.254.0.12
+  ports:
+  - name: client
+    port: 2181
+  - port: 2888
+    name: node-contact
+  - port: 3888
+    name: node-election
+
+---
+
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: zookeeper-node3
+  labels: 
+    app: zookeeper-node3
+spec:
+  volumes:
+  - name: zookeeper-disk
+    persistentVolumeClaim:
+      claimName: kube-disk-claim  
+  containers: 
+  - name: zookeeper-node3    
+    resources:
+      requests:
+        memory: 100Mi
+      limits: 
+        memory: 256Mi
+    env:
+    - name: ZOO_MY_ID
+      value: "3"
+    - name: ZOO_SERVERS
+      value: server.1=zookeeper-node1.default.svc.app:2888:3888 server.2=zookeeper-node2.default.svc.app:2888:3888 server.3=0.0.0.0:2888:3888    
+    - name: ZOO_LOG4J_PROP
+      value: INFO,ROLLINGFILE
+    image: zookeeper
+    imagePullPolicy: Always
+    ports:
+    - containerPort: 2181
+      name: client
+      protocol: TCP
+    - containerPort: 2888
+      name: node-contact
+      protocol: TCP
+    - containerPort: 3888
+      name: node-election
+      protocol: TCP
+    volumeMounts:
+    - mountPath: /data
+      name: zookeeper-disk
+      subPath: zookeeper/node3/data
+    - mountPath: /datalog
+      name: zookeeper-disk
+      subPath: zookeeper/node3/datalog
+    - mountPath: /logs
+      name: zookeeper-disk
+      subPath: zookeeper/node3/logs
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: zookeeper-node3
+spec:
+  selector:
+    app: zookeeper-node3
+  externalIPs:
+  - 10.254.0.13
+  ports:
+  - name: client
+    port: 2181
+    protocol: TCP
+  - port: 2888
+    name: node-contact
+    protocol: TCP
+  - port: 3888
+    name: node-election
+    protocol: TCP
+
+
+
