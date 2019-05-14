@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #本机IP地址
-MASTER_HOST_IP=192.168.4.40
+MASTER_HOST_IP=192.168.1.113
 TOKEN=""
 DISCOVERY_TOKEN_CA_CERT_HASH=""
 STEP=0
@@ -21,8 +21,8 @@ case $STEP in
 	echo "step:1">node-install-cache
 ;;
 1 )
-#        yum -y remove docker-ce*
-#        yum -y install docker-ce-17.09.0.ce-1.el7.centos.x86_64
+        yum -y remove docker-ce*
+        yum -y install docker-ce-17.09.0.ce-1.el7.centos.x86_64 --nogpgcheck
 	#添加aliyuncs.com镜像仓库和docker-cn镜像仓库
 if [ ! -f '/etc/docker/daemon.json' ];then
 	mkdir -p /etc/docker
@@ -30,13 +30,15 @@ if [ ! -f '/etc/docker/daemon.json' ];then
 fi
 cat <<EOF > /etc/docker/daemon.json
 {
-   "registry-mirrors": ["https://s4z40bwn.mirror.aliyuncs.com","https://registry.docker-cn.com"]
+   "registry-mirrors": ["https://s4z40bwn.mirror.aliyuncs.com","https://registry.docker-cn.com"],
+   "exec-opts": ["native.cgroupdriver=cgroupfs"]
 }
 EOF
+	systemctl enable docker
 	systemctl start docker
 	#安装
 	yum -y remove kubelet kubeadm kubectl
-	yum -y install kubelet kubeadm kubectl
+	yum -y install kubelet kubeadm kubectl --nogpgcheck
 	echo "step:2">node-install-cache
 ;;
 2 )
@@ -49,8 +51,6 @@ EOF
 	sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
 	#开放端口ectd:2379-2380;api server:6443;kubelet api:10250;kube-scheduler:10251;kube-controller-manager:10252
 	firewall-cmd --zone=public --add-port=10250-10252/tcp --permanent
-	systemctl reload firewalld
-	systemctl restart firewalld
 	echo "step:3">node-install-cache
 ;;
 3 )
