@@ -45,7 +45,9 @@ sh k8s-node-install.sh
         mkdir -p ~/.kube
         cp -Rf /etc/kubernetes/admin.conf ~/.kube/config
         chown $(id -u):$(id -g) ~/.kube/config
-
+	#允许调度MASTER节点
+	kubectl taint node kube-master node-role.kubernetes.io/master-
+	kubectl get pods -n kube-system
         #执行测试
         kubectl get nodes
         echo "step:9">node-install-cache

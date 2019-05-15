@@ -31,7 +31,7 @@ fi
 cat <<EOF > /etc/docker/daemon.json
 {
    "registry-mirrors": ["https://s4z40bwn.mirror.aliyuncs.com","https://registry.docker-cn.com"],
-   "exec-opts": ["native.cgroupdriver=systemd"]
+   "exec-opts": ["native.cgroupdriver=cgroupfs"]
 }
 EOF
 	systemctl enable docker
