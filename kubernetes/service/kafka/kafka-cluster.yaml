@@ -1,0 +1,265 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kafka-config
+  labels:
+    conf: kafka-config
+data:
+  server.properties: |
+    listener.security.protocol.map=PLAINTEXT:PLAINTEXT,SSL:SSL,SASL_PLAINTEXT:SASL_PLAINTEXT,SASL_SSL:SASL_SSL
+    num.network.threads=3
+    num.io.threads=8
+    socket.send.buffer.bytes=102400
+    socket.receive.buffer.bytes=102400
+    socket.request.max.bytes=104857600
+    log.dirs=/data/data
+    num.partitions=1
+    num.recovery.threads.per.data.dir=1
+    offsets.topic.replication.factor=3
+    transaction.state.log.replication.factor=3
+    transaction.state.log.min.isr=1
+    log.retention.hours=168
+    log.segment.bytes=1073741824
+    log.retention.check.interval.ms=300000
+    zookeeper.connect=zookeeper-node1.default.svc.app:2181,zookeeper-node2.default.svc.app:2181,zookeeper-node3.default.app:2181
+    zookeeper.connection.timeout.ms=6000
+    group.initial.rebalance.delay.ms=0
+  log4j.properties: |
+    kafka.logs.dir=/data/logs
+    log4j.rootLogger=INFO, stdout, kafkaAppender
+    log4j.appender.stdout=org.apache.log4j.ConsoleAppender
+    log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
+    log4j.appender.stdout.layout.ConversionPattern=[%d] %p %m (%c)%n
+    log4j.appender.kafkaAppender=org.apache.log4j.DailyRollingFileAppender
+    log4j.appender.kafkaAppender.DatePattern='.'yyyy-MM-dd-HH
+    log4j.appender.kafkaAppender.File=${kafka.logs.dir}/server.log
+    log4j.appender.kafkaAppender.layout=org.apache.log4j.PatternLayout
+    log4j.appender.kafkaAppender.layout.ConversionPattern=[%d] %p %m (%c)%n
+    log4j.appender.stateChangeAppender=org.apache.log4j.DailyRollingFileAppender
+    log4j.appender.stateChangeAppender.DatePattern='.'yyyy-MM-dd-HH
+    log4j.appender.stateChangeAppender.File=${kafka.logs.dir}/state-change.log
+    log4j.appender.stateChangeAppender.layout=org.apache.log4j.PatternLayout
+    log4j.appender.stateChangeAppender.layout.ConversionPattern=[%d] %p %m (%c)%n
+    log4j.appender.requestAppender=org.apache.log4j.DailyRollingFileAppender
+    log4j.appender.requestAppender.DatePattern='.'yyyy-MM-dd-HH
+    log4j.appender.requestAppender.File=${kafka.logs.dir}/kafka-request.log
+    log4j.appender.requestAppender.layout=org.apache.log4j.PatternLayout
+    log4j.appender.requestAppender.layout.ConversionPattern=[%d] %p %m (%c)%n
+    log4j.appender.cleanerAppender=org.apache.log4j.DailyRollingFileAppender
+    log4j.appender.cleanerAppender.DatePattern='.'yyyy-MM-dd-HH
+    log4j.appender.cleanerAppender.File=${kafka.logs.dir}/log-cleaner.log
+    log4j.appender.cleanerAppender.layout=org.apache.log4j.PatternLayout
+    log4j.appender.cleanerAppender.layout.ConversionPattern=[%d] %p %m (%c)%n
+    log4j.appender.controllerAppender=org.apache.log4j.DailyRollingFileAppender
+    log4j.appender.controllerAppender.DatePattern='.'yyyy-MM-dd-HH
+    log4j.appender.controllerAppender.File=${kafka.logs.dir}/controller.log
+    log4j.appender.controllerAppender.layout=org.apache.log4j.PatternLayout
+    log4j.appender.controllerAppender.layout.ConversionPattern=[%d] %p %m (%c)%n
+    log4j.appender.authorizerAppender=org.apache.log4j.DailyRollingFileAppender
+    log4j.appender.authorizerAppender.DatePattern='.'yyyy-MM-dd-HH
+    log4j.appender.authorizerAppender.File=${kafka.logs.dir}/kafka-authorizer.log
+    log4j.appender.authorizerAppender.layout=org.apache.log4j.PatternLayout
+    log4j.appender.authorizerAppender.layout.ConversionPattern=[%d] %p %m (%c)%n
+    log4j.logger.org.I0Itec.zkclient.ZkClient=INFO
+    log4j.logger.org.apache.zookeeper=INFO
+    log4j.logger.kafka=INFO
+    log4j.logger.org.apache.kafka=INFO
+    log4j.logger.kafka.request.logger=WARN, requestAppender
+    log4j.additivity.kafka.request.logger=false
+    #log4j.logger.kafka.network.Processor=TRACE, requestAppender
+    #log4j.logger.kafka.server.KafkaApis=TRACE, requestAppender
+    #log4j.additivity.kafka.server.KafkaApis=false
+    log4j.logger.kafka.network.RequestChannel$=WARN, requestAppender
+    log4j.additivity.kafka.network.RequestChannel$=false
+    log4j.logger.kafka.controller=TRACE, controllerAppender
+    log4j.additivity.kafka.controller=false
+    log4j.logger.kafka.log.LogCleaner=INFO, cleanerAppender
+    log4j.additivity.kafka.log.LogCleaner=false
+    log4j.logger.state.change.logger=TRACE, stateChangeAppender
+    log4j.additivity.state.change.logger=false
+    log4j.logger.kafka.authorizer.logger=INFO, authorizerAppender
+    log4j.additivity.kafka.authorizer.logger=false
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kafka-broker1
+  labels:
+    app: kafka-broker1
+spec:
+  volumes:
+  - name: kafka-broker-disk
+    persistentVolumeClaim:
+      claimName: kube-disk-claim
+  - name: kafka-broker-config
+    configMap:
+      name: kafka-config
+  containers:
+  - name: kafka-broker1
+    env:
+    - name: BROKER_ID
+      value: "10"
+    resources:
+      requests:
+        memory: 100Mi
+      limits:
+        memory: 512Mi
+    image: tumingjian/kafka:2.2.0
+    imagePullPolicy: IfNotPresent
+    command: ["sh","/kafka/bin/kafka-server-start.sh", "/kafka/config/server.properties","--override","broker.id=$(BROKER_ID)"]
+    ports:
+    - containerPort: 9092
+      name: client
+    volumeMounts:
+    - mountPath: /data/data
+      name: kafka-broker-disk
+      subPath: kafka/broker1/data
+    - mountPath: /kafka/logs
+      name: kafka-broker-disk
+      subPath: kafka/broker1/logs 
+    - mountPath: /kafka/config/server.properties
+      name: kafka-broker-config
+      subPath: server.properties
+    - mountPath: /kafka/config/log4j.properties
+      name: kafka-broker-config
+      subPath: log4j.properties
+---
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-broker1
+spec:
+  selector:
+    app: kafka-broker1
+  externalIPs:
+  - 10.254.0.21
+  ports:
+  - name: client
+    port: 9092
+
+---
+
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kafka-broker2
+  labels:
+    app: kafka-broker2
+spec:
+  volumes:
+  - name: kafka-broker-disk
+    persistentVolumeClaim:
+      claimName: kube-disk-claim
+  - name: kafka-broker-config
+    configMap:
+      name: kafka-config
+  containers:
+  - name: kafka-broker2
+    env:
+    - name: BROKER_ID
+      value: "12"
+    resources:
+      requests:
+        memory: 100Mi
+      limits:
+        memory: 512Mi
+    image: tumingjian/kafka:2.2.0
+    imagePullPolicy: IfNotPresent
+    command: ["sh","/kafka/bin/kafka-server-start.sh", "/kafka/config/server.properties","--override","broker.id=$(BROKER_ID)"]
+    ports:
+    - containerPort: 9092
+      name: client
+    volumeMounts:
+    - mountPath: /data/data
+      name: kafka-broker-disk
+      subPath: kafka/broker2/data
+    - mountPath: /kafka/logs
+      name: kafka-broker-disk
+      subPath: kafka/broker2/logs 
+    - mountPath: /kafka/config/server.properties
+      name: kafka-broker-config
+      subPath: server.properties
+    - mountPath: /kafka/config/log4j.properties
+      name: kafka-broker-config
+      subPath: log4j.properties
+---
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-broker2
+spec:
+  selector:
+    app: kafka-broker2
+  externalIPs:
+  - 10.254.0.22
+  ports:
+  - name: client
+    port: 9092
+
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kafka-broker3
+  labels:
+    app: kafka-broker3
+spec:
+  volumes:
+  - name: kafka-broker-disk
+    persistentVolumeClaim:
+      claimName: kube-disk-claim
+  - name: kafka-broker-config
+    configMap:
+      name: kafka-config
+  containers:
+  - name: kafka-broker1
+    env:
+    - name: BROKER_ID
+      value: "13"
+    resources:
+      requests:
+        memory: 100Mi
+      limits:
+        memory: 512Mi
+    image: tumingjian/kafka:2.2.0
+    imagePullPolicy: IfNotPresent
+    command: ["sh","/kafka/bin/kafka-server-start.sh", "/kafka/config/server.properties","--override","broker.id=$(BROKER_ID)"]
+    ports:
+    - containerPort: 9092
+      name: client
+    volumeMounts:
+    - mountPath: /data/data
+      name: kafka-broker-disk
+      subPath: kafka/broker3/data
+    - mountPath: /kafka/logs
+      name: kafka-broker-disk
+      subPath: kafka/broker3/logs 
+    - mountPath: /kafka/config/server.properties
+      name: kafka-broker-config
+      subPath: server.properties
+    - mountPath: /kafka/config/log4j.properties
+      name: kafka-broker-config
+      subPath: log4j.properties
+---
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-broker3
+spec:
+  selector:
+    app: kafka-broker3
+  externalIPs:
+  - 10.254.0.23
+  ports:
+  - name: client
+    port: 9092
+
