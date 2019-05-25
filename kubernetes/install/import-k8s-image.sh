@@ -1,5 +1,5 @@
 #!/bin/bash
-image_tar_path=root@172.18.0.6:~/kubernetes/kubernetes-image.tar.gz
+image_tar_path=root@172.16.1.4:~/kubernetes/kubernetes-image.tar.gz
 file_name=$(basename $image_tar_path)
 target_path=~/kubernetes
 if [ -n $1 ]; then

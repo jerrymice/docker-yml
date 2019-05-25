@@ -1,0 +1,17 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: curl
+spec:
+  replicas: 1 
+  template:
+    metadata:
+      labels:
+        app: curl
+    spec:
+      serviceAccountName: cicd
+      containers:
+      - name: curl
+        image: appropriate/curl
+        command: ["sleep"]
+        args: ["5000"]
