@@ -21,7 +21,7 @@ data:
     log.retention.hours=168
     log.segment.bytes=1073741824
     log.retention.check.interval.ms=300000
-    zookeeper.connect=zookeeper-node1.default.svc.app:2181,zookeeper-node2.default.svc.app:2181,zookeeper-node3.default.app:2181
+    zookeeper.connect=10.254.0.11:2181,10.254.0.12:2181,10.254.0.13:2181
     zookeeper.connection.timeout.ms=6000
     group.initial.rebalance.delay.ms=0
   log4j.properties: |
