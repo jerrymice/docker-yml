@@ -20,7 +20,7 @@ spec:
     - name: ZOO_MY_ID
       value: "1"
     - name: ZOO_SERVERS
-      value: server.1=0.0.0.0:2888:3888 server.2=zookeeper-node2.default.svc.app:2888:3888 server.3=zookeeper-node3.default.svc.app:2888:3888    
+      value: server.1=0.0.0.0:2888:3888 server.2=zookeeper-node2.default.svc.cluster.local:2888:3888 server.3=zookeeper-node3.default.svc.cluster.local:2888:3888    
     - name: ZOO_LOG4J_PROP
       value: INFO,ROLLINGFILE
     image: zookeeper
@@ -88,7 +88,7 @@ spec:
     - name: ZOO_MY_ID
       value: "2"
     - name: ZOO_SERVERS
-      value: server.1=zookeeper-node1.default.svc.app:2888:3888 server.2=0.0.0.0:2888:3888 server.3=zookeeper-node3.default.svc.app:2888:3888    
+      value: server.1=zookeeper-node1.default.svc.cluster.local:2888:3888 server.2=0.0.0.0:2888:3888 server.3=zookeeper-node3.default.svc.cluster.local:2888:3888    
     - name: ZOO_LOG4J_PROP
       value: INFO,ROLLINGFILE
     image: zookeeper
@@ -155,7 +155,7 @@ spec:
     - name: ZOO_MY_ID
       value: "3"
     - name: ZOO_SERVERS
-      value: server.1=zookeeper-node1.default.svc.app:2888:3888 server.2=zookeeper-node2.default.svc.app:2888:3888 server.3=0.0.0.0:2888:3888    
+      value: server.1=zookeeper-node1.default.svc.cluster.local:2888:3888 server.2=zookeeper-node2.default.svc.cluster.local:2888:3888 server.3=0.0.0.0:2888:3888    
     - name: ZOO_LOG4J_PROP
       value: INFO,ROLLINGFILE
     image: zookeeper
