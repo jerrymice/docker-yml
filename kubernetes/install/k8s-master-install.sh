@@ -32,12 +32,12 @@ sh k8s-node-install.sh
 	echo "step:6">node-install-cache
 ;;
 6 )
-    ./download-image.sh    
+    #./download-image.sh    
     echo "step:7">node-install-cache;
 ;;
 7 )
         #在master上初始化集群
-        kubeadm init --apiserver-advertise-address=$MASTER_HOST_IP --pod-network-cidr=172.18.0.0/16 --node-name=kube-master 
+        kubeadm init --apiserver-advertise-address=$MASTER_HOST_IP --pod-network-cidr=172.20.0.0/16 --node-name=kube-master  
         echo "step:8">node-install-cache
 ;;
 8 )
