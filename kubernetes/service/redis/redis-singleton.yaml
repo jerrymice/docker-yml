@@ -33,7 +33,7 @@ spec:
           - mountPath: /mnt/data/redis/data
             name: redis-disk
             subPath: redis/data
-          - mountPath: /mnt/data/redis/redis.log
+          - mountPath: /mnt/data/redis/
             name: redis-disk
             subPath: redis/redis.log
 
