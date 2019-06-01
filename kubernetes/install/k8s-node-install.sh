@@ -70,7 +70,7 @@ net.bridge.bridge-nf-call-iptables = 1
 EOF
 echo "FORWARD_IPV4=\"YES\"">>/etc/sysconfig/network
 echo "1" > /proc/sys/net/ipv4/ip_forward
-sysctl --systemctl
+sysctl --system
 ../ipvs/install.sh
 echo "kubernetes node already installed"
 	#添加其他节点命令(请在相应的节点机器上运行)
