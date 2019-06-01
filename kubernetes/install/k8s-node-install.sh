@@ -69,7 +69,7 @@ net.bridge.bridge-nf-call-ip6tables = 1
 net.bridge.bridge-nf-call-iptables = 1
 EOF
 ip_forward=$(cat /etc/sysconfig/network | grep FORWARD_IPV4=\"YES\")
-if [ -n "$ip_forward" ]; then
+if [ ! -n "$ip_forward" ]; then
     echo "FORWARD_IPV4=\"YES\"">>/etc/sysconfig/network
 fi
 echo "1" > /proc/sys/net/ipv4/ip_forward
