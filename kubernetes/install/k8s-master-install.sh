@@ -1,7 +1,12 @@
 #!/bin/bash
 
 #本机IP地址
-MASTER_HOST_IP=192.168.1.113
+MASTER_HOST_IP=`ifconfig eth0 | grep inet | awk -F ' ' 'NR==1{print $2}'`
+POD_NETWORK_CIDR=172.20.0.0/16
+if [ -n "$1" ]; then
+ POD_NETWORK_CIDR=$1
+fi
+echo "kubernetes网段:$POD_NETWORK_CIDR"
 STEP=0
 if [ -f 'node-install-cache' ];then
   STEP=`cat node-install-cache | awk -F ':' '{print $2}'`
@@ -43,7 +48,8 @@ sh k8s-node-install.sh
 8 )
         #复制admin.conf文件.让kubectl命令可用.
         mkdir -p ~/.kube
-        cp -Rf /etc/kubernetes/admin.conf ~/.kube/config
+        #cp -Rf /etc/kubernetes/admin.conf ~/.kube/config
+        ln -s /etc/kubernetes/admin.conf ~/.kube/config
         chown $(id -u):$(id -g) ~/.kube/config
 	#允许调度MASTER节点
 	kubectl taint node kube-master node-role.kubernetes.io/master-

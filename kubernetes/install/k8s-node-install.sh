@@ -1,7 +1,8 @@
 #!/bin/bash
 
 #本机IP地址
-MASTER_HOST_IP=192.168.1.113
+
+MASTER_HOST_IP=`ifconfig eth0 | grep inet | awk -F ' ' 'NR==1{print $2}'`
 TOKEN=""
 DISCOVERY_TOKEN_CA_CERT_HASH=""
 STEP=0
@@ -31,10 +32,11 @@ fi
 cat <<EOF > /etc/docker/daemon.json
 {
    "registry-mirrors": ["https://s4z40bwn.mirror.aliyuncs.com","https://registry.docker-cn.com"],
-   "exec-opts": ["native.cgroupdriver=cgroupfs"]
+   "exec-opts": ["native.cgroupdriver=systemd"]
 }
 EOF
 	systemctl enable docker
+    systemctl daemon-reload
 	systemctl start docker
 	#安装
 	yum -y remove kubelet kubeadm kubectl
@@ -66,7 +68,10 @@ cat <<EOF >  /etc/sysctl.d/k8s.conf
 net.bridge.bridge-nf-call-ip6tables = 1
 net.bridge.bridge-nf-call-iptables = 1
 EOF
+echo "FORWARD_IPV4=\"YES\"">>/etc/sysconfig/network
+echo "1" > /proc/sys/net/ipv4/ip_forward
 sysctl --systemctl
+../ipvs/install.sh
 echo "kubernetes node already installed"
 	#添加其他节点命令(请在相应的节点机器上运行)
 	#kubeadm join 192.168.4.208:6443 --token r6sck4.dhx93qh4acxr6d0l --discovery-token-ca-cert-hash sha256:966db4635cb701bca173382e7c072dd779eae2b0658689c8c34b6c39f31dded5
