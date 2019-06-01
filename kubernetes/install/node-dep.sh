@@ -68,12 +68,20 @@ cat <<EOF >  /etc/sysctl.d/k8s.conf
 net.bridge.bridge-nf-call-ip6tables = 1
 net.bridge.bridge-nf-call-iptables = 1
 EOF
+#开启IPV4内核转发
 ip_forward=$(cat /etc/sysconfig/network | grep FORWARD_IPV4=\"YES\")
 if [ ! -n "$ip_forward" ]; then
     echo "FORWARD_IPV4=\"YES\"">>/etc/sysconfig/network
 fi
 echo "1" > /proc/sys/net/ipv4/ip_forward
 sysctl --system
+#防止DNS被覆盖
+dns_none=$(cat /etc/NetworkManager/NetworkManager.conf | grep dns=none | grep -v \#dns=none)
+if [ ! -n "$dns_none" ]; then
+    echo "dns=none" >>/etc/NetworkManager/NetworkManager.conf
+    systemctl restart NetworkManager
+fi
+#安装IPVS内核转发
 ../ipvs/install.sh
 echo "kubernetes node already installed"
 	#添加其他节点命令(请在相应的节点机器上运行)
