@@ -23,7 +23,7 @@ spec:
       value: server.1=0.0.0.0:2888:3888 server.2=zookeeper-node2.default.svc.cluster.local:2888:3888 server.3=zookeeper-node3.default.svc.cluster.local:2888:3888    
     - name: ZOO_LOG4J_PROP
       value: INFO,ROLLINGFILE
-    image: zookeeper
+    image: "zookeeper:3.4.12"
     imagePullPolicy: Always
     ports:
     - containerPort: 2181
@@ -41,7 +41,7 @@ spec:
       subPath: zookeeper/node1/datalog
     - mountPath: /logs
       name: zookeeper-disk
-      subPath: zookeeper/node1/logs
+      subPath: zookeeper/logs
 
 ---
 
@@ -91,7 +91,7 @@ spec:
       value: server.1=zookeeper-node1.default.svc.cluster.local:2888:3888 server.2=0.0.0.0:2888:3888 server.3=zookeeper-node3.default.svc.cluster.local:2888:3888    
     - name: ZOO_LOG4J_PROP
       value: INFO,ROLLINGFILE
-    image: zookeeper
+    image: "zookeeper:3.4.12"
     imagePullPolicy: Always
     ports:
     - containerPort: 2181
@@ -109,7 +109,7 @@ spec:
       subPath: zookeeper/node2/datalog
     - mountPath: /logs
       name: zookeeper-disk
-      subPath: zookeeper/node2/logs
+      subPath: zookeeper/logs
 
 ---
 
@@ -158,7 +158,7 @@ spec:
       value: server.1=zookeeper-node1.default.svc.cluster.local:2888:3888 server.2=zookeeper-node2.default.svc.cluster.local:2888:3888 server.3=0.0.0.0:2888:3888    
     - name: ZOO_LOG4J_PROP
       value: INFO,ROLLINGFILE
-    image: zookeeper
+    image: "zookeeper:3.4.12"
     imagePullPolicy: Always
     ports:
     - containerPort: 2181
@@ -179,7 +179,7 @@ spec:
       subPath: zookeeper/node3/datalog
     - mountPath: /logs
       name: zookeeper-disk
-      subPath: zookeeper/node3/logs
+      subPath: zookeeper/logs
 
 ---
 

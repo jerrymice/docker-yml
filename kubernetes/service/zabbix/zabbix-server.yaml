@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: zabbix-server
+spec:
+  selector:
+    matchLabels:
+      app: zabbix-server
+  template:
+    metadata:
+      labels:
+        app: zabbix-server
+    spec:
+      volumes:
+        - name: zabbix-server
+          persistentVolumeClaim:
+            claimName: kube-disk-claim
+      containers:
+        - name: zabbix-server
+          image: "zabbix/zabbix-server-mysql:alpine-3.4.12"
+          env:
+            - name: DB_SERVER_HOST
+              value: 10.254.0.3
+            - name: MYSQL_USER
+              value: "root"
+            - name: MYSQL_PASSWORD
+              value: "123456"
+            - name: ZBX_DEBUGLEVEL
+              value: "0"
+            - name: MYSQL_DATABASE
+              value: "zabbix"
+          ports:
+            - containerPort: 10051
+          volumeMounts:
+            - mountPath: /var/log/
+              name: zabbix-server
+              subPath: zabbix-server/log/ 
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: zabbix-server
+spec:
+  selector:
+    app: zabbix-server
+  ports:
+    - protocol: TCP
+      port: 10051
+      targetPort: 10051
+  externalIPs:
+    - 10.254.0.31
+
