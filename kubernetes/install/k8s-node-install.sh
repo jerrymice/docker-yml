@@ -68,7 +68,10 @@ cat <<EOF >  /etc/sysctl.d/k8s.conf
 net.bridge.bridge-nf-call-ip6tables = 1
 net.bridge.bridge-nf-call-iptables = 1
 EOF
-echo "FORWARD_IPV4=\"YES\"">>/etc/sysconfig/network
+ip_forward=$(cat /etc/sysconfig/network | grep FORWARD_IPV4=\"YES\")
+if [ -n "$ip_forward" ]; then
+    echo "FORWARD_IPV4=\"YES\"">>/etc/sysconfig/network
+fi
 echo "1" > /proc/sys/net/ipv4/ip_forward
 sysctl --system
 ../ipvs/install.sh
