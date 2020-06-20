@@ -48,24 +48,18 @@ until [ -z "$1" ]; do
             cat $base_dir/cache/$cache_file_name
             break;;
         -p|--pull)
-            mirror=mirrorgooglecontainers
+            registry=registry.cn-chengdu.aliyuncs.com
+            mirror=tumingjian
             google=k8s.gcr.io
             K8S_IMAGES=$($0 -l)
             for source_image in $K8S_IMAGES; do
                 image_part=`echo $source_image | awk -F '/' '{print \$2}'`
-                if [[ $image_part =~ "coredns" ]]; then
-                    mirror_image="coredns/$image_part"
-                else
-                    mirror_image=$mirror/$image_part
-                    echo "正在拉取$mirror_image"
-                fi
-                docker pull $mirror_image
-                docker tag  $mirror_image $google/$image_part
+                mirror_image=$mirror/$image_part
+                echo "正在拉取$mirror_image"
+                docker pull $registry/$mirror_image
+                docker tag  $registry/$mirror_image $google/$image_part
             done
-            mirror=mirrorgooglecontainers
-            docker rmi `docker images | grep $mirror | awk -F ' ' '{print $1,$2}' OFS=':'`
-            mirror=coredns/
-            docker rmi `docker images | grep $mirror | awk -F ' ' '{print $1,$2}' OFS=':'`
+            docker rmi `docker images | grep $registry/$mirror | awk -F ' ' '{print $1,$2}' OFS=':'`
             break;;
         -e|--export)
             out_file_name=~/kubernetes/kubernetes-image.tar.gz

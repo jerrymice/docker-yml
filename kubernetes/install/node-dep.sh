@@ -40,7 +40,8 @@ EOF
 	systemctl start docker
 	#安装
 	yum -y remove kubelet kubeadm kubectl
-	yum install -y kubeadm-1.14.1-0.x86_64 kubectl-1.14.1-0.x86_64 kubelet-1.14.1-0.x86_64 --nogpgcheck
+    version=1.18.4-0.x86_64
+	yum install -y kubeadm-$version kubectl-$version kubelet-$version --nogpgcheck
 	echo "step:2">node-install-cache
 
 ;;
