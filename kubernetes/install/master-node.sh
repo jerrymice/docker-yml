@@ -20,6 +20,9 @@ kubectl taint node kube-master node-role.kubernetes.io/master-
 kubectl get pods -n kube-system
 #执行测试
 kubectl get nodes
+api_iptables_rule="-A INPUT -p tcp -m state --state NEW -m tcp --dport 6443 -j ACCEPT"
+sed -i "s/$api_iptables_rule//" /etc/sysconfig/iptables
+sed -i "s/--dport 22 -j ACCEPT/&\n$api_iptables_rule/" /etc/sysconfig/iptables
 echo "step:9">node-install-cache
 echo "kubernetes master node install success"
 echo "kubernetes master already installed"
