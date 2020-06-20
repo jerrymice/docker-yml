@@ -5,15 +5,15 @@ metadata:
   labels:
     name: kube-disk
 spec:
-  storageClassName: local-kube-disk
+  storageClassName: nfs-kube-disk
   capacity:
     storage: 10Gi
   accessModes: 
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
-  hostPath:
-    path: /opt/kube/pod/disk
-    type: DirectoryOrCreate
+  nfs:
+    server: 172.16.1.19
+    path: /nfs-data
 
 ---
 
@@ -22,12 +22,12 @@ kind: PersistentVolumeClaim
 metadata:
     name: kube-disk-claim
 spec:
-  storageClassName: local-kube-disk
+  storageClassName: nfs-kube-disk
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 10Gi
+      storage: 5Gi
   selector:
     matchLabels:
       name: kube-disk

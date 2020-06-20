@@ -40,6 +40,8 @@ systemctl enable rpcbind.service
 systemctl enable nfs-server.service
 systemctl start rpcbind.service
 systemctl start nfs-server.service
+systemctl enable nfs.service
+systemctl start nfs.service
 echo "启动服务成功"
 showmount -e 127.0.0.1
 
